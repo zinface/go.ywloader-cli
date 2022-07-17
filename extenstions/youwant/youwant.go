@@ -52,7 +52,7 @@ func loaderYouwants(cmd *cobra.Command) (models.Youwants, error) {
 
 	if !utils.FileExists(useConfigFile) {
 		ylog.FileNotExits(useConfigFile)
-		return nil, fmt.Errorf("%v does not exist", useConfigFile)
+		return nil, fmt.Errorf("配置文件不存在: %v", useConfigFile)
 	}
 
 	return models.LoaderYouwantsFromFile(useConfigFile)
