@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+# 如何创建一个 Bash Completions 自动补全骨架
+
+# 1. 了解 complete 补全行为，定制常规级补全方案
+    # complete：用法：complete [-abcdefgjksuv] [-pr] [-DEI] [-o 选项] [-A 动作] [-G 全局模式] [-W 词语列表]  [-F 函数] [-C 命令] [-X 过滤模式] [-P 前缀] [-S 后缀] [名称 ...]
+        # -F 执行指定函数名
+            # 候选结果保存在 COMPREPLY 数组变量里，补全功能更强大.
+            # 可以实现命令参数补全，函数名在 /etc/bash_completion 定义的。
+        # -f 补全文件名，后可跟 -X 参数。
+        # -X 过滤表达式，符合表达式的文件名会被排除，
+            # 即不会在补全候选显示出来，如果以感叹号开头，则表示反转，即符合表达式的文件名才显示。
+        # -o 补全类型
+            # filenames 表示补全的是一个文件，跟 -f 参数使用才有效；其它值如 dirnames 表示补全目录。
+
+# 2. 了解脚本内部变量
+    # COMPREPLY 用于存储 completions 的数组变量 - 补全机制将此变量内容显示为补全
+
+# 3. 了解脚本内传入参数变量
+    # COMP_WORDS    在程序名称之后提供的的所有单词的数组
+    # COMP_CWORD    指向当前光标所在单词的数组索引——换句话说，当按下 tab 键时光标所在单词的索引
+    # COMP_LINE     当前命令行
+
+# 4. 了解一些内置命令
+    # compgen [option] [word]
+        # compgen 命令根据 option 生成与 word 可能匹配的补全
+        # 一个内置命令，支持命令的大多数 option 的生成(例如，-W用于单词列表，-d用于目录）并根据用户已经键入的内容过滤它们。
+    # complete
+        # complete命令指定如何对各个名称进行补全。
+        # 如果指定了选项 "-p" 或者没有指定任何选项，则把已有的补全方法用一种可以重新作为作为输入的格式打印出来。
+        # 选项 "-r" 用以删除指定名称的补全方法，不指定名称时删除所有的名称的补全方法。
+        # 选项 "-D" 的意思是其后的选项和动作将应用到默认命令补全，也就是说之前未定义的补全命令也可以补全。
+        # 选项 "-E" 的意思是其后的选项和动作将应用到空命令补全，也就是说补全空白行。
+        # 对于选项 "-G"、"-W"、"-X"、"-P" 和 "-S"，应该使用括号进行保护，防止补全开始前被扩展。
+        # ......
+    # compopt
+        # compopt 命令修改每个名称指定的补全选项，如果没有指定名称则修改当前执行的补全的选项
+        # 如果也没有指定选项，则显示每个名称或当前补全所用的选项。
+        # 选项可能的取值就是上面的内建命令 complete 的有效选项。
+
+
+_skeleton() {
+    # 如果命令为 $ skeleton a
+        #                  ^ 为光标位置
+        # cur   =a
+        # prev  =skeleton
+
+    # 如果命令为 $ skeleton a
+        #                   ^ 为光标位置
+        # cur   =
+        # prev  =a
+
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local words=${COMP_WORDS[*]}
+    local cword=${COMP_CWORD}
+
+    # 以上手动初始化的变量可用以下内置定义进行初始化
+        # local cur prev words cword
+        # _init_completion || return
+
+    # echo "WORDS=${COMP_WORDS[*]}"
+    # echo "CWORD=${COMP_CWORD}"
+
+    local skeleton_commands=(
+        init
+        add
+        version
+    )
+    COMPREPLY=(${skeleton_commands[*]})
+}
+
+complete -F _skeleton skeleton
+# 使用 -F 进行函数补全
+    # 在 Bash 中，输入 skelecton 时，补全操作将尝试调用 _skelecton 函数尝试生成补全内容。
+    # _skelecton 函数将被输入三个参数：
+        # 要补全的命令名、当前光标所在的词、当前光标所在的词的前一个词
+        # COMP_WORDS
+        # COMP_CWORD
+        # COMP_LINE

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+_ywloader_version() {
+    COMPREPLY=()
+}
+
+_ywloader_init() {
+    COMPREPLY=()
+}
+
+_ywloader_add() {
+    COMPREPLY=()
+}
+
+_ywloader_list() {
+    COMPREPLY=()
+}
+
+_ywloader_show() {
+    COMPREPLY=()
+}
+
+_ywloader_use() {
+    COMPREPLY=()
+}
+
+_ywloader_help() {
+    local cword=$1; shift
+    COMPREPLY=($(compgen -W "${@}" "$cword"))
+}
+
+_ywloader() {
+
+    local cur prev words cword
+    _init_completion || return
+
+    local binary="${words[0]}"
+
+    local ywloader_help_commands=(
+        version init add list show use
+    )
+    local ywloader_commands=(help ${ywloader_help_commands[*]})
+
+    COMPREPLY=()
+
+    case $prev in 
+        help)
+            _ywloader_${prev} "${cur}" "${ywloader_help_commands[*]}"
+            ;;
+        version|init|add|list|show|use)
+            _ywloader_${prev}
+            ;;
+        *)
+            COMPREPLY=($(compgen -W "${ywloader_commands[*]}" "${COMP_WORDS[1]}"))
+            return 0
+            ;;
+    esac
+
+
+}
+
+complete -F _ywloader ywloader
