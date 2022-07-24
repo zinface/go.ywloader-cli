@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	_desc_del = "删除一个项目"
+	_desc_del = "删除一条项目"
 )
 
 // delCmd represents the del command
