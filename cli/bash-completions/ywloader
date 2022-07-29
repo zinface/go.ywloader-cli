@@ -37,7 +37,7 @@ _ywloader() {
     local binary="${words[0]}"
 
     local ywloader_help_commands=(
-        version init add list show use
+        version init add list show use del change
     )
     local ywloader_commands=(help ${ywloader_help_commands[*]})
 
@@ -47,7 +47,7 @@ _ywloader() {
         help)
             _ywloader_${prev} "${cur}" "${ywloader_help_commands[*]}"
             ;;
-        version|init|add|list|show|use)
+        version|init|add|list|show|use|del|change)
             _ywloader_${prev}
             ;;
         *)
