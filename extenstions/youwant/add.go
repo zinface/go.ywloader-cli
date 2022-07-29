@@ -169,7 +169,7 @@ func addFromCommandFileFlags(cmd *cobra.Command, args []string) models.FileItems
 func AddHandler(cmd *cobra.Command, args []string) {
 
 	// 使用的配置文件
-	var useConfigFile = useConfigFilePath(cmd)
+	var useConfigFile = useConfigFilePathDefaultLocal(cmd)
 	alog.UseConfig(useConfigFile)
 
 	// 文件内容

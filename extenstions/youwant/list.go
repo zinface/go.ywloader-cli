@@ -15,7 +15,7 @@ var llog = &logs.Logs{
 }
 
 func ListHandler(cmd *cobra.Command, args []string) {
-	useConfigFile := useConfigFilePath(cmd)
+	useConfigFile := useConfigFilePathDefaultLocal(cmd)
 
 	if !utils.FileExists(useConfigFile) {
 		llog.ConfigNotExist(useConfigFile)

@@ -46,9 +46,27 @@ func useConfigFilePath(cmd *cobra.Command) string {
 	return youwant_json
 }
 
+// useConfigFilePathDefaultLocal 获取以本地优先的配置文件
+func useConfigFilePathDefaultLocal(cmd *cobra.Command) string {
+	configArguments(cmd, []string{})
+	global_youwant_json, err := ycm.GetUserConfigFilePath()
+	if global {
+		if err != nil {
+			return youwant_json
+		}
+		return global_youwant_json
+	} else {
+		if !utils.FileExists(youwant_json) {
+			global = true
+			return global_youwant_json
+		}
+	}
+	return youwant_json
+}
+
 // loaderYouwants 读取配置内容
 func loaderYouwants(cmd *cobra.Command) (models.Youwants, error) {
-	useConfigFile := useConfigFilePath(cmd)
+	useConfigFile := useConfigFilePathDefaultLocal(cmd)
 
 	if !utils.FileExists(useConfigFile) {
 		ylog.FileNotExits(useConfigFile)
