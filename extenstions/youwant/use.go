@@ -133,52 +133,83 @@ func UseHandler(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	for _, cmd := range want.Template.Shell.Commands {
-		fmt.Printf("指令: %v\n", cmd)
+	// ======== 准备处理 文件 ========
+	if len(want.Template.Files) != 0 {
+		fmt.Println("--------------------------------")
 	}
+
 	for _, file := range want.Template.Files {
-		fmt.Printf("文件: %v\n", file.Name)
+		s := fmt.Sprintf("文件: %v", file.Name)
+		uselog.Println(s)
 	}
 
 	if len(want.Template.Files) != 0 {
-		for i := 0; i < len(want.Template.Files); i++ {
-			file := want.Template.Files[i]
-			fmt.Printf("> file: %v\n", file.Name)
-			if utils.FileExists(file.Name) {
-				uselog.Print("NOTE: 文件已存在:", file.Name)
-			}
-			var _continue = utils.GetStdinStringValue("处理文件: 是否继续(y/n):", "y")
-			if strings.Contains(_continue, "y") {
-				// 解出文件内容
-				b, err := base64.StdEncoding.DecodeString(file.Base64)
-				if err != nil {
-					uselog.Print("处理失败", err.Error())
-					continue
-				}
-				// 还原文件的目录路径
-				dirPath := filepath.Dir(file.Name)
-				if dirPath != "." {
-					os.MkdirAll(dirPath, 0755)
-				}
-				// 还原文件
-				f, err := os.Create(file.Name)
-				if err != nil {
-					uselog.Print("创建失败", err.Error())
-					continue
-				}
-				defer f.Close()
-				f.Write(b)
 
-				// 还原权限
-				if file.Permission != 0 {
-					f.Chmod(os.FileMode(file.Permission))
+		for {
+			var _continue = utils.GetStdinStringValue("处理文件: 是否继续(yes/no):", "")
+			if strings.Contains(_continue, "yes") {
+				for i := 0; i < len(want.Template.Files); i++ {
+					file := want.Template.Files[i]
+
+					var _continue = true
+					if utils.FileExists(file.Name) {
+						_continue = false
+						// uselog.Print()
+						question := fmt.Sprintf("NOTE: 文件已存在(%v), 是否继续(y/n)?", file.Name)
+						var answer = utils.GetStdinStringValue(question, "y")
+						if strings.Contains(answer, "y") {
+							_continue = true
+						}
+					}
+
+					if _continue {
+						// 解出文件内容
+						b, err := base64.StdEncoding.DecodeString(file.Base64)
+						if err != nil {
+							uselog.Print("处理失败", err.Error())
+							continue
+						}
+						// 还原文件的目录路径
+						dirPath := filepath.Dir(file.Name)
+						if dirPath != "." {
+							os.MkdirAll(dirPath, 0755)
+						}
+						// 还原文件
+						f, err := os.Create(file.Name)
+						if err != nil {
+							uselog.Print("创建失败", err.Error())
+							continue
+						}
+						defer f.Close()
+						f.Write(b)
+
+						// 还原权限
+						if file.Permission != 0 {
+							f.Chmod(os.FileMode(file.Permission))
+						}
+						uselog.Print("已处理", file.Name)
+					}
+					if !_continue {
+						uselog.Print("放弃处理", file.Name)
+					}
 				}
-				uselog.Print("已处理", file.Name)
+				break
 			}
-			if strings.Contains(_continue, "n") {
-				uselog.Print("放弃处理", file.Name)
+			if strings.Contains(_continue, "no") {
+				uselog.Println("放弃处理文件.")
+				break
 			}
 		}
+	}
+
+	// ======== 准备处理 指令 ========
+	if len(want.Template.Shell.Commands) != 0 {
+		fmt.Println("--------------------------------")
+	}
+
+	for _, cmd := range want.Template.Shell.Commands {
+		s := fmt.Sprintf("指令: %v", cmd)
+		uselog.Println(s)
 	}
 
 	if len(want.Template.Shell.Commands) != 0 {
