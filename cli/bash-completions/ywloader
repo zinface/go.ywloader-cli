@@ -24,6 +24,14 @@ _ywloader_use() {
     COMPREPLY=()
 }
 
+_ywloader_use() {
+    COMPREPLY=()
+}
+
+_ywloader_change() {
+    COMPREPLY=()
+}
+
 _ywloader_help() {
     local cword=$1; shift
     COMPREPLY=($(compgen -W "${@}" "$cword"))
