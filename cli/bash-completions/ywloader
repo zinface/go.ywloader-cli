@@ -1,5 +1,110 @@
 #!/usr/bin/env bash
 
+_ywloader_debug() {
+    if [[ -n ${BASH_COMP_DEBUG_FILE:-} ]]; then
+        echo "$@" >> "${BASH_COMP_DEBUG_FILE}"
+    fi
+}
+
+_ywloader_debug_clean() {
+    if [[ -n ${BASH_COMP_DEBUG_FILE:-} ]]; then
+        echo "" > "${BASH_COMP_DEBUG_FILE}"
+    fi
+}
+
+trim() {
+    local str=$1
+    echo "${str}" | grep -o "[^ ]\+\( \+[^ ]\+\)*"
+}
+
+trim_cur() {
+    local str=$1
+    echo "${str}" | grep -o "[^']\+\('\+[^']\+[^' ]\)*"
+}
+
+
+_ywloader_check_flags() {
+    _ywloader_debug "_ywloader_check_flags words:" ${words[1]}
+    _ywloader_debug "_ywloader_check_flags cur:" ${cur}
+
+    local flags=()
+    if [[ $cur == -* ]]; then
+        case ${words[1]} in 
+            add)
+                flags=( "-g" "-f" )
+                ;;
+            list|show)
+                flags=( "-g" )
+                ;;
+        esac
+        
+        _ywloader_debug "_ywloader_check_flags:" "${#flags[@]} -ge  1"
+        if [[ ${#flags[@]} -ge 1 ]]; then
+            _ywloader_debug "_ywloader_check_flags flags:" "${flags[@]}"
+            COMPREPLY=( $( compgen -W "${flags[@]}" "$cur"))
+            return 1
+        fi
+        _ywloader_debug "_ywloader_check_flags flags:" "${flags[@]}"
+    else
+        _ywloader_debug "_ywloader_check_flags flags: not -*" 
+    fi
+    return 0
+}
+
+_youwant_check_global() {
+    _ywloader_debug "_youwant_check_global: " "${words[@]}"
+    for (( i=2; i < ${#words[@]}; i++ )) ; do
+        if [[ "${words[i]}" == "-g" ]]; then
+            if [[ "${global}" == "0" ]]; then
+                global=1
+            fi
+            return 1
+        fi
+    done
+    return 0
+}
+
+_youwant_completion() {
+    local global=0
+    
+    _ywloader_debug "_youwant_completion: " "${words[@]}"
+    _youwant_check_global
+    _ywloader_debug "_youwant_completion global: " "${global}"
+
+    # 
+    if [[ "${global}" == "0" ]]; then
+        for i in `ywloader list | cut -d':' -f3`; do 
+            i="$(trim "$i")"
+            _ywloader_debug "completion for:" "$i"
+            # if [[ "${#ITEMS[@]}" == "0" && "${ITEMS[@]}" == "" ]]
+            ITEMS=(${ITEMS[@]} "$i")
+            # fi
+        done
+    else
+        for i in `ywloader list -g | cut -d':' -f3`; do 
+            i="$(trim "$i")"
+            _ywloader_debug "completion for:" "$i"
+            # if [[ "${#ITEMS[@]}" == "0" && "${ITEMS[@]}" == "" ]]
+            ITEMS=(${ITEMS[@]} "$i")
+            # fi
+        done
+    fi
+
+    # _ywloader_debug "trim_cur:" "if [[ \"${cur}\" == '* ]]"
+    # if [[ "${cur}" == \'* ]]; then
+    #     cur=`trim_cur "${cur}"`
+    # fi
+    # _ywloader_debug "trim_cur:" "${cur}"
+
+    COMPREPLY=( $( compgen -W "${ITEMS[*]}" "$cur" ) )
+    for (( i=0; i < ${#COMPREPLY[@]}; i++ ))
+    do
+        COMPREPLY[$i]="'${COMPREPLY[i]}'"
+    done
+
+    return 0
+}
+
 _ywloader_version() {
     COMPREPLY=()
 }
@@ -10,61 +115,126 @@ _ywloader_init() {
 
 _ywloader_add() {
     COMPREPLY=()
+    _ywloader_check_flags || return
+    _filedir
 }
 
 _ywloader_list() {
     COMPREPLY=()
+
+    local global=0
+    local ITEMS=()
+    local IFS=$'\n'
+    
+    _ywloader_debug "_ywloader_list: " "$cur"
+    _ywloader_check_flags || return 0
+    _youwant_check_global
 }
 
 _ywloader_show() {
     COMPREPLY=()
+
+    local global=0
+    local ITEMS=()
+    local IFS=$'\n'
+    
+    _ywloader_debug "_ywloader_show: " "$cur"
+    _ywloader_check_flags || return 0
+    _youwant_check_global
+    _youwant_completion
 }
 
 _ywloader_use() {
     COMPREPLY=()
-}
 
-_ywloader_use() {
-    COMPREPLY=()
+    local global=0
+    local ITEMS=()
+    local IFS=$'\n'
+    
+    _ywloader_debug "_ywloader_use: " "$cur"
+    _ywloader_check_flags || return 0
+    _youwant_check_global
+    _youwant_completion
 }
 
 _ywloader_change() {
     COMPREPLY=()
+
+    local global=0
+    local ITEMS=()
+    local IFS=$'\n'
+    
+    _ywloader_debug "_ywloader_change: " "$cur"
+    _ywloader_check_flags || return 0
+    _youwant_check_global
+    _youwant_completion
+}
+
+_ywloader_del() {
+    COMPREPLY=()
+
+    local global=0
+    local ITEMS=()
+    local IFS=$'\n'
+    
+    _ywloader_debug "_ywloader_del: " "$cur"
+    _ywloader_check_flags || return 0
+    _youwant_check_global
+    _youwant_completion
 }
 
 _ywloader_help() {
-    local cword=$1; shift
-    COMPREPLY=($(compgen -W "${@}" "$cword"))
+    local curword=$1; shift
+    _ywloader_debug "_ywloader_help:" "${@}" "$curword"
+    COMPREPLY=($(compgen -W "${@}" "$curword"))
 }
 
 _ywloader() {
+    _ywloader_debug_clean
+    _ywloader_debug "========= starting completion logic =========="
 
     local cur prev words cword
     _init_completion || return
 
+    _ywloader_debug "_ywloader cur:  " "${cur}"
+    _ywloader_debug "_ywloader prev: " "${prev}"
+    _ywloader_debug "_ywloader words:" "${words[*]}"
+    _ywloader_debug "_ywloader cword:" "${cword}"
+
     local binary="${words[0]}"
+    local command="${words[1]}"
 
     local ywloader_help_commands=(
         version init add list show use del change
     )
-    local ywloader_commands=(help ${ywloader_help_commands[*]})
+    local ywloader_commands=(
+        help 
+        ${ywloader_help_commands[*]}
+    )
 
     COMPREPLY=()
 
-    case $prev in 
-        help)
-            _ywloader_${prev} "${cur}" "${ywloader_help_commands[*]}"
-            ;;
-        version|init|add|list|show|use|del|change)
-            _ywloader_${prev}
-            ;;
-        *)
+    # 
+    if [[ ${cword} == 1 ]]; then
+        _ywloader_debug "_ywloader ${cword} == 1"
+        if [[ "${binary}" == "ywloader" ]]; then
+            _ywloader_debug "_ywloader ywloader_commands[*]:" "${ywloader_commands[*]}"
+            _ywloader_debug "_ywloader COMP_WORDS[1]:" "${COMP_WORDS[1]}"
             COMPREPLY=($(compgen -W "${ywloader_commands[*]}" "${COMP_WORDS[1]}"))
-            return 0
-            ;;
-    esac
-
-
+        fi
+    elif [[ ${cword} -gt 1 ]]; then 
+        _ywloader_debug "_ywloader ${cword} -gt 1"
+        case $command in 
+            help)
+                _ywloader_${command} "${cur}" "${ywloader_help_commands[*]}"
+                ;;
+            version|init|add|list|show|use|del|change)
+                _ywloader_${command}
+                ;;
+            *)
+                ;;
+        esac
+    fi
 }
 
 complete -F _ywloader ywloader
