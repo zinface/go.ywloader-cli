@@ -30,10 +30,10 @@ _ywloader_check_flags() {
     local flags=()
     if [[ $cur == -* ]]; then
         case ${words[1]} in 
-            add)
+            add|change)
                 flags=( "-g" "-f" )
                 ;;
-            list|show)
+            list|show|use)
                 flags=( "-g" )
                 ;;
         esac
@@ -167,7 +167,16 @@ _ywloader_change() {
     _ywloader_debug "_ywloader_change: " "$cur"
     _ywloader_check_flags || return 0
     _youwant_check_global
-    _youwant_completion
+
+    # 处理组织参数，匹配结构为:
+    #   ywloader change [-g] <label> [file ...]
+    if [[ $cword -lt 3 ]];then
+        _youwant_completion
+    elif [[ "-g" == "${words[2]}" && $cword -eq 3 ]];then
+        _youwant_completion
+    else
+        _filedir
+    fi
 }
 
 _ywloader_del() {
