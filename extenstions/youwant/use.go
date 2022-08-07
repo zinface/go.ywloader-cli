@@ -125,14 +125,31 @@ func useWant(cmd *cobra.Command, args []string) (models.Youwant, error) {
 	return models.Youwant{}, err
 }
 
-// useHandler 指令实现
-func UseHandler(cmd *cobra.Command, args []string) {
-	want, err := useWant(cmd, args)
-	if err != nil {
-		uselog.Println(err.Error())
-		os.Exit(1)
+func useWants(cmd *cobra.Command, args []string) models.Youwants {
+	var wants = models.Youwants{}
+
+	if len(args) > 1 {
+		for _, arg := range args {
+			if want, err := useWant(cmd, []string{arg}); err == nil {
+				wants = append(wants, want)
+			}
+		}
+	} else {
+		if want, err := useWant(cmd, args); err == nil {
+			wants = append(wants, want)
+		}
 	}
 
+	var labels = []string{}
+	for _, want := range wants {
+		labels = append(labels, fmt.Sprintf("'%v'", want.Label))
+	}
+	uselog.Println(fmt.Sprintf("选中%v项: [%v]", len(labels), strings.Join(labels, ",")))
+
+	return wants
+}
+
+func applyWant(want models.Youwant) {
 	// ======== 准备处理 文件 ========
 	if len(want.Template.Files) != 0 {
 		fmt.Println("--------------------------------")
@@ -226,6 +243,19 @@ func UseHandler(cmd *cobra.Command, args []string) {
 				break
 			}
 		}
+	}
+}
+
+// useHandler 指令实现
+func UseHandler(cmd *cobra.Command, args []string) {
+	// if _, err := useWant(cmd, args); err != nil {
+	// 	uselog.Println(err.Error())
+	// 	os.Exit(1)
+	// }
+
+	wants := useWants(cmd, args)
+	for _, want := range wants {
+		applyWant(want)
 	}
 }
 
