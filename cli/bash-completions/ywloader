@@ -36,6 +36,9 @@ _ywloader_check_flags() {
             list|show|use)
                 flags=( "-g" )
                 ;;
+            serve)
+                flags=( "-p" )
+                ;;
         esac
         
         _ywloader_debug "_ywloader_check_flags:" "${#flags[@]} -ge  1"
@@ -192,6 +195,21 @@ _ywloader_del() {
     _youwant_completion
 }
 
+_ywloader_serve() {
+    COMPREPLY=()
+    
+    _ywloader_debug "_ywloader_serve:" "${@}" "$curword"
+
+    # 检查是否应该补全 flags 
+    _ywloader_check_flags || return 0
+
+    # 如果没有任何 flags 的话, 例如 -p <port>，直接就应该提示目录补全
+    if [[ "${prev}" != "-p" ]]; then
+        _filedir -d
+        return
+    fi
+}
+
 _ywloader_help() {
     local curword=$1; shift
     _ywloader_debug "_ywloader_help:" "${@}" "$curword"
@@ -213,8 +231,11 @@ _ywloader() {
     local binary="${words[0]}"
     local command="${words[1]}"
 
+    _ywloader_debug "_ywloader binary:" "${binary}"
+    _ywloader_debug "_ywloader command:" "${command}"
+
     local ywloader_help_commands=(
-        version init add list show use del change
+        version init add list show use del change serve
     )
     local ywloader_commands=(
         help 
@@ -225,19 +246,19 @@ _ywloader() {
 
     # 
     if [[ ${cword} == 1 ]]; then
-        _ywloader_debug "_ywloader ${cword} == 1"
+        _ywloader_debug "_ywloader cword: ${cword} == 1"
         if [[ "${binary}" == "ywloader" ]]; then
             _ywloader_debug "_ywloader ywloader_commands[*]:" "${ywloader_commands[*]}"
             _ywloader_debug "_ywloader COMP_WORDS[1]:" "${COMP_WORDS[1]}"
             COMPREPLY=($(compgen -W "${ywloader_commands[*]}" "${COMP_WORDS[1]}"))
         fi
     elif [[ ${cword} -gt 1 ]]; then 
-        _ywloader_debug "_ywloader ${cword} -gt 1"
+        _ywloader_debug "_ywloader cword: ${cword} -gt 1"
         case $command in 
             help)
                 _ywloader_${command} "${cur}" "${ywloader_help_commands[*]}"
                 ;;
-            version|init|add|list|show|use|del|change)
+            version|init|add|list|show|use|del|change|serve)
                 _ywloader_${command}
                 ;;
             *)
