@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"strings"
 
@@ -53,7 +54,19 @@ func serveStart(_rootDir string, _host string, _port int) error {
 
 	var host = fmt.Sprintf("%s:%d", _host, _port)
 
-	log.Println("启动服务器:", "http://"+host)
+	// log.Println("启动服务器:", "http://"+host)
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, addr := range addrs {
+		// addr.String() -> 127.0.0.1/8
+		if ipnet, ok := addr.(*net.IPNet); ok && !strings.Contains(ipnet.IP.String(), "::") {
+			log.Printf("启动服务器: http://%v:%v\n", ipnet.IP.String(), _port)
+		}
+	}
+
 	return r.Run(host)
 }
 
