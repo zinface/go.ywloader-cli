@@ -79,8 +79,10 @@ func useConfigFilePathDefaultLocal(cmd *cobra.Command) string {
 
 // loaderYouwants 读取配置内容
 func loaderYouwants(cmd *cobra.Command) (models.Youwants, error) {
+	// 获取魔法配置文件位置
 	useConfigFile := useConfigFilePathDefaultLocal(cmd)
 
+	// 如果配置文件不存在将打印配置文件不存在
 	if !utils.FileExists(useConfigFile) {
 		ylog.FileNotExits(useConfigFile)
 		return nil, fmt.Errorf("配置文件不存在: %v", useConfigFile)
