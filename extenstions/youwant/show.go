@@ -6,13 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// 打印指定条目的基本信息
 func ShowHandler(cmd *cobra.Command, args []string) {
-	// 尝试加载 wants
+	// 从命令行参数中获取指定的条目信息
 	want, err := useWant(cmd, args)
-	if err != nil {
+	if err != nil { // 出现异常将进行停止
 		panic(err)
 	}
 
+	// 按一定顺序结构打印条目结构信息
 	fmt.Printf("Label:  %v\n", want.Label)
 	fmt.Printf("Detail: %v\n", want.Detail)
 	fmt.Printf("Type:   %v\n", want.Type)
