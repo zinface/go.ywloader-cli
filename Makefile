@@ -26,3 +26,6 @@ install-bash-completions:
 	cp cli/bash-completions/ywloader ${BASH_COMPATDIR}
 endif
 endif
+
+enter-debug-mode:
+	export BASH_COMP_DEBUG_FILE=`pwd`/debug.file && bash
