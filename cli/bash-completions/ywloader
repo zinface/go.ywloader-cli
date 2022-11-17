@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+# ywloader 命令调试环境变量，如果此环境变量被设置将会打印命令在补全时的调试信息
 _ywloader_debug() {
     if [[ -n ${BASH_COMP_DEBUG_FILE:-} ]]; then
         echo "$@" >> "${BASH_COMP_DEBUG_FILE}"
     fi
 }
 
+# ywloader 命令调试环境变量，与 _ywloader_debug 相同但用于首次执行时清空调试文件
 _ywloader_debug_clean() {
     if [[ -n ${BASH_COMP_DEBUG_FILE:-} ]]; then
         echo "" > "${BASH_COMP_DEBUG_FILE}"
@@ -217,26 +219,43 @@ _ywloader_help() {
 }
 
 _ywloader() {
+    # 调试操作: 清空调试文件内容
     _ywloader_debug_clean
     _ywloader_debug "========= starting completion logic =========="
 
+# 1. 准备一些基本的信息，这些都是最基本的，也是在补全脚本中仅能获取的有限内容
+
+    # 定义一些函数内变量，由 completion 驱动内置进行初始化内容
+        # cur   当前的位置
+        # prev  上一个词
+        # words 所有词
+        # cword 当前词
     local cur prev words cword
     _init_completion || return
 
-    _ywloader_debug "_ywloader cur:  " "${cur}"
-    _ywloader_debug "_ywloader prev: " "${prev}"
-    _ywloader_debug "_ywloader words:" "${words[*]}"
-    _ywloader_debug "_ywloader cword:" "${cword}"
-
+    # 为了更好的进行识别
+        # 将第一个词标记为可执行程序名称
+        # 将第二个词标记为子命令
     local binary="${words[0]}"
     local command="${words[1]}"
 
-    _ywloader_debug "_ywloader binary:" "${binary}"
+    _ywloader_debug "========== _ywloader function env ============"
+    _ywloader_debug "_ywloader cur:   " "${cur}"
+    _ywloader_debug "_ywloader prev:  " "${prev}"
+    _ywloader_debug "_ywloader words: " "${words[*]}"
+    _ywloader_debug "_ywloader cword: " "${cword}"
+    _ywloader_debug
+    _ywloader_debug "_ywloader binary: " "${binary}"
     _ywloader_debug "_ywloader command:" "${command}"
+    _ywloader_debug "========== _ywloader function env ============"
 
+# 2. 准备此命令有关的次级信息
+
+    # 子命令集合，如果子命令不在此中，将认为尚未完成子命令的提示，可直接使用此处进行补全
     local ywloader_help_commands=(
         version init add list show use del change serve
     )
+
     local ywloader_commands=(
         help 
         ${ywloader_help_commands[*]}
@@ -267,4 +286,10 @@ _ywloader() {
     fi
 }
 
+# 在 Bash 中，输入 ywloader 时，补全操作将尝试调用 _ywloader 函数尝试生成补全内容。
+    # _ywloader 函数将被输入三个参数：
+        # 要补全的命令名、当前光标所在的词、当前光标所在的词的前一个词
+        # COMP_WORDS
+        # COMP_CWORD
+        # COMP_LINE
 complete -F _ywloader ywloader
