@@ -41,6 +41,9 @@ _ywloader_check_flags() {
             serve)
                 flags=( "-p" )
                 ;;
+            search)
+                flags=( "-j" )
+                ;;
         esac
         
         _ywloader_debug "_ywloader_check_flags:" "${#flags[@]} -ge  1"
@@ -212,6 +215,22 @@ _ywloader_serve() {
     fi
 }
 
+_ywloader_search() {
+    COMPREPLY=()
+    _ywloader_debug "_ywloader_search:" "${@}" "$curword"
+
+    # 检查是否应该补全 flags 
+    _ywloader_check_flags || return 0
+
+    # 如果没有任何 flags 的话, 例如，直接就应该提示项目补全
+    # ywloader search
+    # 但绝对不是以下内容 
+    # if [[ "${prev}" != "-p" ]]; then
+    #     _filedir -d
+    #     return
+    # fi
+}
+
 _ywloader_help() {
     local curword=$1; shift
     _ywloader_debug "_ywloader_help:" "${@}" "$curword"
@@ -253,7 +272,7 @@ _ywloader() {
 
     # 子命令集合，如果子命令不在此中，将认为尚未完成子命令的提示，可直接使用此处进行补全
     local ywloader_help_commands=(
-        version init add list show use del change serve
+        version init add list show use del change serve search
     )
 
     local ywloader_commands=(
@@ -277,7 +296,7 @@ _ywloader() {
             help)
                 _ywloader_${command} "${cur}" "${ywloader_help_commands[*]}"
                 ;;
-            version|init|add|list|show|use|del|change|serve)
+            version|init|add|list|show|use|del|change|serve|search)
                 _ywloader_${command}
                 ;;
             *)
