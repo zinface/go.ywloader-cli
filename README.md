@@ -16,6 +16,7 @@ Available Commands:
   list        列出仓库项目索引
   logo        打印可执行程序 logo 头部
   remote      使用远程仓库源
+  search      搜索仓库项目索引
   serve       启动一个web服务(默认:8080)
   show        显示项目详细信息
   use         使用快速项目模板
