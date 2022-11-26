@@ -18,7 +18,7 @@ func SearchHandler(cmd *cobra.Command, args []string) {
 
 	// 1. 预检查传入的参数信息
 	if !useAll && len(args) < 1 {
-		fmt.Fprintf(os.Stderr, "未指定参数")
+		fmt.Fprintf(os.Stderr, "未指定参数\n")
 		os.Exit(1)
 	}
 
