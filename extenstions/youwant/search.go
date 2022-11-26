@@ -13,8 +13,11 @@ import (
 func SearchHandler(cmd *cobra.Command, args []string) {
 	var err error
 
+	// 0. 准备用于输出项目配置类型，检查 --all 参数
+	useAll, err := cmd.Flags().GetBool("all")
+
 	// 1. 预检查传入的参数信息
-	if len(args) < 1 {
+	if !useAll && len(args) < 1 {
 		fmt.Fprintf(os.Stderr, "未指定参数")
 		os.Exit(1)
 	}
@@ -32,9 +35,13 @@ func SearchHandler(cmd *cobra.Command, args []string) {
 	// 以数组形式存储 Label 内容
 	// 此部分用于 arrayForJson 内容
 	for i := 0; i < len(wants); i++ {
-		// TODO：增加多关键词搜索功能
-		if strings.Contains(wants[i].Label, args[0]) {
+		if useAll {
 			arrayForLabel = append(arrayForLabel, wants[i].Label)
+		} else {
+			// TODO：增加多关键词搜索功能
+			if strings.Contains(wants[i].Label, args[0]) {
+				arrayForLabel = append(arrayForLabel, wants[i].Label)
+			}
 		}
 	}
 

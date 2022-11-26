@@ -34,5 +34,6 @@ func init() {
 	// is called directly, e.g.:
 	// searchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	searchCmd.Flags().BoolP("global", "g", false, "使用全局配置项")
+	searchCmd.Flags().BoolP("all", "a", false, "输出全部配置项")
 	searchCmd.Flags().BoolP("json", "j", false, "使用 json 格式输出结果")
 }
