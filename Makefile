@@ -27,5 +27,6 @@ install-bash-completions:
 endif
 endif
 
+# 进入调试模式，并指定调试文件为当前目录下的 debug.file 
 enter-debug-mode:
 	export BASH_COMP_DEBUG_FILE=`pwd`/debug.file && bash
