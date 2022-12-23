@@ -4,6 +4,7 @@
 # 
 # 支持基本子命令的补全能力
 #   add     添加项目到仓库索引
+#   cat     查看指定项目的文件
 #   change  修改一条项目
 #   del     删除一条项目
 #   init    初始化当前目录为 Youwant 仓库
@@ -77,8 +78,8 @@ trim_cur() {
     # ywloader xxxx -
     #               ^被检查项
 _ywloader_check_flags() {
-    _ywloader_debug "_ywloader_check_flags words:" ${words[1]}
-    _ywloader_debug "_ywloader_check_flags cur:" ${cur}
+    _ywloader_debug "_ywloader_check_flags: words:" ${words[1]}
+    _ywloader_debug "_ywloader_check_flags: cur:" ${cur}
 
     # flags 用于存储对应子命令的参数标志列表
     local flags=()
@@ -90,10 +91,10 @@ _ywloader_check_flags() {
         #    v 预进行筛选一些子命令
         case ${words[1]} in 
             # 默认 add/change 将拥有可接受的 -g -f 标志(那么其它命令也是相同逻辑)
-            add|change)
+            add|change|list)
                 flags=( "-g" "-f" )
                 ;;
-            list|show)
+            cat|show)
                 flags=( "-g" )
                 ;;
             use)
@@ -125,7 +126,14 @@ _ywloader_check_flags() {
                 # abbb
                 # 例如提供了  aaa abbb ccc 三个单词列表，并再提供一个用户输入的 a 单词
                 # 将会输出匹配的开头包含 'a' 的单词列表
-            COMPREPLY=( $( compgen -W "${flags[@]}" "$cur"))
+            COMPREPLY=( $( compgen -W "${flags[*]}" $cur ) )
+            #                                  ^ 改进此处，将 @ 改为 *，解决了-补全只出现第一个的问题
+
+            # 在这里，我们要处理打印调试 log，所以使用双引号与 @ 不换行列表
+            _ywloader_debug "_ywloader_check_flags: compgen -W \"${flags[@]}\" \"$cur\""
+            #                                     ^ 此处如果换成 * 将会变成换行列表
+
+            _ywloader_debug "_ywloader_check_flags: COMPREPLY: ${COMPREPLY[@]}"
             # 这里同理 与 check_global 部分的内容一样
             return 1
         fi
@@ -294,6 +302,7 @@ _youwant_completion() {
 
 
     COMPREPLY=( $( compgen -W "${ITEMS[*]}" "$cur" ) )
+
     for (( i=0; i < ${#COMPREPLY[@]}; i++ ))
     do
         COMPREPLY[$i]="'${COMPREPLY[i]}'"
@@ -366,6 +375,36 @@ _ywloader_use() {
     _ywloader_check_flags || return 0
     _youwant_check_global
     _youwant_completion
+}
+
+_ywloader_cat() {
+    COMPREPLY=()
+
+    local global=0
+    local ITEMS=()
+    local IFS=$'\n'
+    
+    _ywloader_debug "_ywloader_cat: " "$cur"
+    _ywloader_check_flags || return 0
+    _youwant_check_global
+
+    local length=${#words[@]}
+    if [[ ${length} -gt 3 ]]; then
+        _ywloader_debug " ----------- 补全文件列表 ${words[2]} ----------- "
+
+        local word2=`trim_cur ${words[2]}`
+        ITEMS=`ywloader list -f ${word2}`
+
+        _ywloader_debug " ----------- 以下是 list -f 的结果 -----------"
+        for item in ${ITEMS[*]}; do
+            _ywloader_debug "->" "${item}"
+        done
+        _ywloader_debug " ----------- 以上是 list -f 的结果 -----------"
+
+        COMPREPLY=( $( compgen -W "${ITEMS[*]}" "$cur" ) )
+    else
+        _youwant_completion
+    fi
 }
 
 _ywloader_change() {
@@ -475,7 +514,7 @@ _ywloader() {
 
     # 子命令集合，如果子命令不在此中，将认为尚未完成子命令的提示，可直接使用此处进行补全
     local ywloader_help_commands=(
-        version init add list show use del change serve search
+        version init add list show use del change serve search cat
     )
 
     local ywloader_commands=(
@@ -499,7 +538,7 @@ _ywloader() {
             help)
                 _ywloader_${command} "${cur}" "${ywloader_help_commands[*]}"
                 ;;
-            version|init|add|list|show|use|del|change|serve|search)
+            version|init|add|list|show|use|del|change|serve|search|cat)
                 _ywloader_${command}
                 ;;
             *)
