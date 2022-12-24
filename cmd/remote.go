@@ -9,11 +9,8 @@ import (
 )
 
 const (
-	_desc_remote      = "使用远程仓库源"
-	_desc_remote_list = "列出远程仓库源项目索引"
+	_desc_remote = "远程仓库命令"
 )
-
-var remoteUrl string
 
 // remoteCmd represents the remote command
 var remoteCmd = &cobra.Command{
