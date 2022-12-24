@@ -9,7 +9,9 @@
 #   init    初始化当前目录为 Youwant 仓库
 #   list    列出仓库项目索引
 #   logo    打印可执行程序的 logo 头部
-#   remote  使用远程仓库源
+#   remote  远程仓库命令
+#     test    测试远程仓库源
+#     list    列出远程仓库源项目索引
 #   search  搜索仓库项目索引
 #   serve   启动一个 web 服务(默认:8080)
 #   show    显示项目详细信息
@@ -302,6 +304,179 @@ _youwant_completion() {
     return 0
 }
 
+##################### remote begin ##################
+_words_size() {
+    echo ${#words[*]}
+}
+_index() {
+    echo ${cword}
+}
+
+_ywloader_remote_debug() {
+    _ywloader_debug "remote ->" "$@"
+}
+
+
+# ywloader remote test 
+                    #  ^
+                    # prev 为 test
+                    # _words_size 为 4
+                    # cur    为 ''
+                    # cwords 为 3
+                    # _index 为 3
+# ywloader remote test -
+                    #   ^
+                    # prev 为 test
+                    # _words_size 为 4
+                    # cur    为 '-'
+                    # cwords 为 3
+                    # _index 为 3
+_ywloader_remote_check_flags() {
+    local remote_flags=()
+    
+    # if (( `_word_size` == 3 )); then
+        
+    # fi
+    COMPREPLY=()
+    if [[ "${cur}" == -* ]]; then 
+        #     v 这里为什么不用 prev 是有考虑到的，prev 可能会指向其它内容
+        case ${remote_command} in
+            test|list)
+                remote_flags=( '-u' )
+                ;;
+            *)
+                ;;
+        esac
+
+        if (( ${#remote_flags[*]} >= 1 )); then
+            _ywloader_remote_debug "${remote_command} contains: -*"
+            _ywloader_remote_debug "flags: ${remote_flags[*]}"
+
+            COMPREPLY=($(compgen -W "$remote_flags" ${cur}))
+            return 1
+        fi
+
+        _ywloader_remote_debug "flags: ${remote_flags[*]}"
+    else
+        _ywloader_remote_debug "flags: not -*"
+    fi
+}
+
+# ywloader remote test 
+                    #  ^
+                    # prev 为 test
+                    # _words_size 为 4
+                    # cur    为 ''
+                    # cwords 为 3
+                    # _index 为 3
+# ywloader remote test -
+                    #   ^
+                    # prev 为 test
+                    # _words_size 为 4
+                    # cur    为 '-'
+                    # cwords 为 3
+                    # _index 为 3
+_ywloader_remote_test() {
+
+    _ywloader_remote_debug "====== _ywloader_remote_test function begin ======"
+
+    _ywloader_remote_check_flags || return 0
+
+    #                      v 有趣的想法，在这里提示一下接下来要写的内容
+    if (( `_words_size` == 5 )); then
+        COMPREPLY=( "http://" )
+    fi
+
+    _ywloader_remote_debug "... possibly finish ?"
+    _ywloader_remote_debug "====== _ywloader_remote_test function end ======"
+}
+
+_ywloader_remote_list() {
+
+    _ywloader_remote_debug "====== _ywloader_remote_list function begin ======"
+
+    _ywloader_remote_check_flags || return 0
+
+    #                      v 有趣的想法，在这里提示一下接下来要写的内容
+    if (( `_words_size` == 5 )); then
+        COMPREPLY=( "http://" )
+    fi
+
+    _ywloader_remote_debug "... possibly finish ?"
+    _ywloader_remote_debug "====== _ywloader_remote_list function end ======"
+}
+
+# ywloader remote
+                # ^ 
+                # prev 为 remote 
+                # _words_size 为 3
+                # cur    为 ' ' 
+                # cwords 为 2
+                # _index 为 2
+# ywloader remote t
+                #  ^ 
+                # prev 为 remote
+                # _words_size 为 3
+                # cur    为 't'
+                # cwords 为 3
+                # _index 为 3
+# ywloader remote test 
+                    #  ^
+                    # prev 为 test
+                    # _words_size 为 4
+                    # cur    为 ''
+                    # cwords 为 3
+                    # _index 为 3
+_ywloader_remote() {
+    _ywloader_remote_debug "========= _ywloader_remote function begin =========="
+
+    _ywloader_remote_debug "COMP_WORDS -> ${COMP_WORDS[*]}"
+    
+    local remote_binary=${words[1]}
+    local remote_command=${words[2]}
+
+    _ywloader_remote_debug "======== _ywloader_remote function env ========"
+    _ywloader_remote_debug "remote words(${#words[*]})   : ${words[*]}"
+    _ywloader_remote_debug "remote prev       : ${prev[*]}"
+    _ywloader_remote_debug "remote cur        : ${cur[*]}"
+    _ywloader_remote_debug "remote cword      : ${cword[*]}"
+    _ywloader_remote_debug 
+    _ywloader_remote_debug "remote binary     : ${remote_binary}"
+    _ywloader_remote_debug "remote command    : ${remote_command}"
+    _ywloader_remote_debug "======== _ywloader_remote function env ========"
+
+    # local cur prev words cword
+    # _init_completion || return
+
+    local ywloader_remote_commands=( 
+        'test' 'list' 
+    )
+    
+    # 如果是第 1/2 种情况，补全
+    if (( `_index` == 2 )); then
+        COMPREPLY=($(compgen -W "${ywloader_remote_commands[*]}" "${words[2]}"))
+    
+    # 否则进入下一层命令( _words_size 大于 3 )
+    elif (( `_words_size` > 3 )); then
+        _ywloader_remote_debug "compgen ${cur}!"    
+        case ${remote_command} in
+            test|list|use)
+                _ywloader_remote_debug "======== -> welcome to ${remote_command} begin <- ========="
+                _ywloader_remote_${remote_command}
+                _ywloader_remote_debug "======== -> welcome to ${remote_command} end <- ========="
+                ;;
+            *)
+                ;;
+        esac
+    fi
+   
+    # compgen -W "$remote_commands" "$"
+    
+    _ywloader_remote_debug "========= _ywloader_remote function end =========="
+}
+
+##################### remote end ##################
+
 _ywloader_version() {
     COMPREPLY=()
 }
@@ -475,7 +650,7 @@ _ywloader() {
 
     # 子命令集合，如果子命令不在此中，将认为尚未完成子命令的提示，可直接使用此处进行补全
     local ywloader_help_commands=(
-        version init add list show use del change serve search
+        version init add list show use del change serve search remote
     )
 
     local ywloader_commands=(
@@ -499,7 +674,7 @@ _ywloader() {
             help)
                 _ywloader_${command} "${cur}" "${ywloader_help_commands[*]}"
                 ;;
-            version|init|add|list|show|use|del|change|serve|search)
+            version|init|add|list|show|use|del|change|serve|search|remote)
                 _ywloader_${command}
                 ;;
             *)
