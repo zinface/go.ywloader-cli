@@ -77,6 +77,24 @@ func getRemoteWants() (models.Youwants, error) {
 	return wants, json.Unmarshal(buffer, &wants)
 }
 
+func getRemoteWantsWithLabels(labels []string) (models.Youwants, error) {
+	remoteWants, err := getRemoteWants()
+	if err != nil {
+		return nil, err
+	}
+
+	var wants models.Youwants
+	for i := 0; i < len(remoteWants); i++ {
+		for j := 0; j < len(labels); j++ {
+			if labels[j] == remoteWants[i].Label {
+				wants = append(wants, remoteWants[i])
+			}
+		}
+	}
+
+	return wants, nil
+}
+
 // func getRemoteWants(url string) (models.Youwants, error) {
 
 // 	return nil, nil
