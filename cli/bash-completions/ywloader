@@ -105,7 +105,7 @@ _ywloader_check_flags() {
                 flags=( "-p" )
                 ;;
             search)
-                flags=( "-j" "--all")
+                flags=( "-j" "-a" )
                 ;;
         esac
         
@@ -341,8 +341,11 @@ _ywloader_remote_check_flags() {
     if [[ "${cur}" == -* ]]; then 
         #     v 这里为什么不用 prev 是有考虑到的，prev 可能会指向其它内容
         case ${remote_command} in
-            test|list)
+            test|list|use)
                 remote_flags=( '-u' )
+                ;;
+            search)
+                remote_flags=( '-a' '-u' '-j' )
                 ;;
             *)
                 ;;
@@ -352,7 +355,7 @@ _ywloader_remote_check_flags() {
             _ywloader_remote_debug "${remote_command} contains: -*"
             _ywloader_remote_debug "flags: ${remote_flags[*]}"
 
-            COMPREPLY=($(compgen -W "$remote_flags" ${cur}))
+            COMPREPLY=($(compgen -W "${remote_flags[*]}" ${cur}))
             return 1
         fi
 
@@ -391,6 +394,110 @@ _ywloader_remote_test() {
     _ywloader_remote_debug "====== _ywloader_remote_test function end ======"
 }
 
+_index_url() {
+    _ywloader_remote_debug "_index_url:  ${words[*]}"
+
+    if (( ${#words[*]} > 3 )); then 
+        for (( i=0; i < ${#words[@]}; i++ ))
+        do
+            _ywloader_remote_debug "_index_url: -> $i -> ${words[${i}]}"
+            if [[ "${words[${i}]}" == "--url" || ${words[${i}]} == "-u" ]]; then
+                echo $i
+                _ywloader_remote_debug "_index_url: -> $i -> ${words[${i}]} found!"
+                return 0
+            fi
+        done
+    fi
+    return 1
+}
+
+_ywloader_remote_url_check() {
+    local retv=1
+    local url_index=`_index_url`
+    if [[ "x${url_index}" != "x" ]]; then
+        ((url_index += 1))
+        remoteUrl=${words[${url_index}]}
+        retv=0
+    fi
+
+    _ywloader_remote_debug "remote_url_check: ui        -> ${ui}"
+    _ywloader_remote_debug "remote_url_check: retv      -> ${retv}"
+    _ywloader_remote_debug "remote_url_check: url_index -> ${url_index}"
+    _ywloader_remote_debug "remote_url_check: remoteUrl -> ${remoteUrl}"
+
+    return $retv
+}
+
+# ywloader 命令的核心补全功能，只有在需要进行补全的命令中才会使用
+# 此函数由 _ywloader_ 开头的各种子命令补全使用
+# 
+_youwant_remote_completion() {
+    _ywloader_remote_debug "===== _ywloader_remote_completion function begin ====="
+
+    # 使用 ywloader remote search 处理远端匹配逻辑
+    # 采用与 ywloader search 与其它命令组合使用的搜索的相似逻辑
+    
+    # 但有一些小小的东西 需要进行处理，因为某些地方与之前的补全不同
+    # 例如在使用 trim_cur 来移除开头的 ' 字符的时候
+        # 使用它的时机，应该在提供给 search 搜索之前进行处理
+        # 一种是移除开头的 ' 另一种还可以是给它加上尾部的 '
+
+    _ywloader_remote_debug "trim_cur:" "if [[ \"${cur}\" == '* ]]"
+    if [[ "${cur}" == \'* ]]; then
+        cur=`trim_cur "${cur}"`
+    fi
+    _ywloader_remote_debug "trim_cur:" "${cur}"
+
+    _ywloader_remote_debug "trim_cur:" "if [[ \"${remoteUrl}\" == '* ]]"
+    if [[ "${remoteUrl}" == \'* ]]; then
+        remoteUrl=`trim_cur "${remoteUrl}"`
+    fi
+    _ywloader_remote_debug "trim_cur:" "${remoteUrl}"
+
+    # 判断在检查过的命令行参数中是否出现了 -g 内容，并由 global 记录为 1
+    #      v 如果 global 为 0 表示未出现 -g 内容
+    #      v 否则 global 为 1 表示已出现 -g 内容
+    if [[ "${remoteUrl}" != "" ]]; then
+        #  ^ 如果在补全时，在补全的命令中出现 --url 内容时的检测
+
+        # v 测试 remoteUrl 的可用性
+        ywloader remote test --url ${remoteUrl}
+        if [[ $? != 0 ]]; then
+            _ywloader_remote_debug "!!! ywloader remote test --url ${remoteUrl} 未检查通过 !!!"
+            _ywloader_remote_debug "!!! '${remoteUrl}' 未检查通过, 不可访问 !!!"
+            _ywloader_remote_debug "!!! '${remoteUrl}' 未检查通过, 不可访问 !!!"
+            _ywloader_remote_debug "!!! '${remoteUrl}' 未检查通过, 不可访问 !!!"
+            _ywloader_remote_debug "!!! ywloader remote test --url ${remoteUrl} 未检查通过 !!!"
+            return 1
+        fi
+
+        if [[ "${cur}" != "" ]]; then
+            #  ^ 如果当前光标所在部分不是空白，将尝试从 search 后补全当前词的尾部内容
+            ITEMS=`ywloader remote search --url ${remoteUrl} $cur`
+        else
+            # 如果是空白词将尝试补全所有内容，好像没啥必要，所以我为此增加了 --all 标志 
+            ITEMS=`ywloader remote search --all --url ${remoteUrl}`
+        fi
+    fi
+
+    # 将打印一些调试信息，这是所有的将要进行提供的补全内容，并由 compgen 进行筛选
+    _ywloader_remote_debug " ----------- 以下是 search 的结果 -----------"
+    for item in ${ITEMS[*]}; do
+        _ywloader_remote_debug "->" "${item}"
+    done
+    _ywloader_remote_debug " ----------- 以上是 search 的结果 -----------"
+
+    COMPREPLY=( $( compgen -W "${ITEMS[*]}" "$cur" ) )
+    for (( i=0; i < ${#COMPREPLY[@]}; i++ ))
+    do
+        COMPREPLY[$i]="'${COMPREPLY[i]}'"
+    done
+
+    _ywloader_remote_debug "===== _ywloader_remote_completion function end ====="
+    return 0
+}
+
+
 _ywloader_remote_list() {
 
     _ywloader_remote_debug "====== _ywloader_remote_list function begin ======"
@@ -404,6 +511,54 @@ _ywloader_remote_list() {
 
     _ywloader_remote_debug "... possibly finish ?"
     _ywloader_remote_debug "====== _ywloader_remote_list function end ======"
+}
+
+# ywloader remote search 
+                      #  ^
+                      # prev 为 test
+                      # _words_size 为 4
+                      # cur    为 ''
+                      # cwords 为 3
+                      # _index 为 3
+# ywloader remote search -
+                       #  ^
+                       # prev 为 test
+                       # _words_size 为 4
+                       # cur    为 ''
+                       # cwords 为 3
+                       # _index 为 3
+_ywloader_remote_search() {
+    _ywloader_remote_debug "====== _ywloader_remote_search function begin ======"
+
+    _ywloader_remote_check_flags || return 0
+
+    #                      v 有趣的想法，在这里提示一下接下来要写的内容
+    if (( `_words_size` == 5 )); then
+        COMPREPLY=( "http://" )
+    fi
+
+    _ywloader_remote_debug "... possibly finish ?"
+    _ywloader_remote_debug "====== _ywloader_remote_search function end ======"
+}
+
+_ywloader_remote_use() {
+    _ywloader_remote_debug "====== _ywloader_remote_use function begin ======"
+
+    local remoteUrl
+    local ITEMS=()
+    local IFS=$'\n'
+
+    _ywloader_remote_check_flags || return 0
+    _ywloader_remote_url_check || return 0
+    _youwant_remote_completion || return 1
+
+    #                      v 有趣的想法，在这里提示一下接下来要写的内容
+    if (( `_words_size` == 5 )); then
+        COMPREPLY=( "http://" )
+    fi
+
+    _ywloader_remote_debug "... possibly finish ?"
+    _ywloader_remote_debug "====== _ywloader_remote_use function end ======"
 }
 
 # ywloader remote
@@ -449,7 +604,7 @@ _ywloader_remote() {
     # _init_completion || return
 
     local ywloader_remote_commands=( 
-        'test' 'list' 
+        'test' 'list' 'search' 'use'
     )
     
     # 如果是第 1/2 种情况，补全
@@ -460,7 +615,7 @@ _ywloader_remote() {
     elif (( `_words_size` > 3 )); then
         _ywloader_remote_debug "compgen ${cur}!"    
         case ${remote_command} in
-            test|list|use)
+            test|list|search|use)
                 _ywloader_remote_debug "======== -> welcome to ${remote_command} begin <- ========="
                 _ywloader_remote_${remote_command}
                 _ywloader_remote_debug "======== -> welcome to ${remote_command} end <- ========="
