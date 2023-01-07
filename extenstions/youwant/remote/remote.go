@@ -16,6 +16,7 @@ import (
 var (
 	ErrResponseInvalid = errors.New("响应无效或缺少必填字段")
 	ErrJsonInvalid     = errors.New("Json数据无效或格式不正确")
+	ErrNoContentLength = errors.New("在远程请求中找不到 Content-Length 标头")
 )
 
 // remote 子命令通用定义
@@ -45,6 +46,9 @@ func getRemoteHeaderContentLength(url string) (int, error) {
 	scl, err := getRemoteHeader(url, "Content-Length")
 	if err != nil {
 		return 0, err
+	}
+	if scl == "" {
+		return 0, ErrNoContentLength
 	}
 	return strconv.Atoi(scl)
 }

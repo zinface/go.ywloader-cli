@@ -11,8 +11,11 @@ import (
 func ListHandler(cmd *cobra.Command, args []string) {
 	//
 	length, err := getRemoteHeaderContentLength(remoteUrl)
-	if err != nil {
+	if err != nil && err != ErrNoContentLength {
 		panic(err)
+	}
+	if err == ErrNoContentLength {
+		fmt.Fprintln(os.Stderr, err)
 	}
 	fmt.Fprintf(os.Stderr, "已接收远端发送的 %d 个字节\n", length)
 
