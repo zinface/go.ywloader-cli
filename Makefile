@@ -1,10 +1,10 @@
 # 默认将构建 ywloader
 all:
-	go build cli/ywloader.go
+	go build
 
 # make install 将会安装 ywloader 到 $GOPATH/bin 中
 install:
-	go install cli/ywloader.go
+	go install
 
 # 已安装 shellcheck 将可使用
 SHELLCHECK=$(shell which shellcheck)
@@ -27,6 +27,6 @@ install-bash-completions:
 endif
 endif
 
-# 进入调试模式，并指定调试文件为当前目录下的 debug.file 
+# 进入调试模式，并指定调试文件为当前目录下的 ywloader-debug.file
 enter-debug-mode:
-	export BASH_COMP_DEBUG_FILE=`pwd`/debug.file && bash
+	cd extra/bash-completion && export BASH_COMP_DEBUG_FILE=`pwd`/ywloader-debug.file && bash

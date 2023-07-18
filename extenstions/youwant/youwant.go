@@ -5,10 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cm "gitee.com/zinface/go.ywloader-cli/extenstions/configmanager"
-	"gitee.com/zinface/go.ywloader-cli/extenstions/logs"
-	"gitee.com/zinface/go.ywloader-cli/models"
-	"gitee.com/zinface/go.ywloader-cli/utils"
+	cm "gitee.com/zinface/ywloader-cli/extenstions/configmanager"
+	"gitee.com/zinface/ywloader-cli/extenstions/logs"
+	"gitee.com/zinface/ywloader-cli/models"
+	"gitee.com/zinface/ywloader-cli/utils"
 )
 
 const (

@@ -1,4 +1,4 @@
-module gitee.com/zinface/go.ywloader-cli
+module gitee.com/zinface/ywloader-cli
 
 go 1.17
 

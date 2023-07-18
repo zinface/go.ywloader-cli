@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"gitee.com/zinface/go.ywloader-cli/utils"
+	"gitee.com/zinface/ywloader-cli/utils"
 )
 
 const (

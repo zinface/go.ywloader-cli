@@ -21,8 +21,34 @@ THE SOFTWARE.
 */
 package main
 
-import "gitee.com/zinface/go.ywloader-cli/cmd"
+import (
+	"embed"
+	"io"
+
+	"gitee.com/zinface/ywloader-cli/cmd"
+)
+
+//go:embed cli/bash-completions
+var embedFs embed.FS
+
+var ywloaderBashCompletion string
+
+func init() {
+	f, err := embedFs.Open("cli/bash-completions/ywloader")
+	if err != nil {
+		panic(err)
+	}
+
+	buffer, err := io.ReadAll(f)
+	if err != nil {
+		panic(err)
+	}
+
+	ywloaderBashCompletion = string(buffer)
+	cmd.BashCompletion = ywloaderBashCompletion
+}
 
 func main() {
+
 	cmd.Execute()
 }

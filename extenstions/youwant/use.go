@@ -12,9 +12,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitee.com/zinface/go.ywloader-cli/extenstions/logs"
-	"gitee.com/zinface/go.ywloader-cli/models"
-	"gitee.com/zinface/go.ywloader-cli/utils"
+	"gitee.com/zinface/ywloader-cli/extenstions/logs"
+	"gitee.com/zinface/ywloader-cli/models"
+	"gitee.com/zinface/ywloader-cli/utils"
 )
 
 type UseIndex int

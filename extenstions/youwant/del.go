@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"gitee.com/zinface/go.ywloader-cli/extenstions/logs"
-	"gitee.com/zinface/go.ywloader-cli/models"
-	"gitee.com/zinface/go.ywloader-cli/utils"
+	"gitee.com/zinface/ywloader-cli/extenstions/logs"
+	"gitee.com/zinface/ywloader-cli/models"
+	"gitee.com/zinface/ywloader-cli/utils"
 	"github.com/spf13/cobra"
 )
 

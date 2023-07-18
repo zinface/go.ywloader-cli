@@ -5,7 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"gitee.com/zinface/go.ywloader-cli/extenstions/youwant/remote"
+	"gitee.com/zinface/ywloader-cli/extenstions/youwant/remote"
 	"github.com/spf13/cobra"
 )
 

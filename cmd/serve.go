@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"gitee.com/zinface/go.ywloader-cli/utils"
+	"gitee.com/zinface/ywloader-cli/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 )

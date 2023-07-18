@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/zinface/go.ywloader-cli/models"
+	"gitee.com/zinface/ywloader-cli/models"
 	"github.com/spf13/cobra"
 )
 

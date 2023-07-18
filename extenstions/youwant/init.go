@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitee.com/zinface/go.ywloader-cli/extenstions/logs"
-	"gitee.com/zinface/go.ywloader-cli/utils"
+	"gitee.com/zinface/ywloader-cli/extenstions/logs"
+	"gitee.com/zinface/ywloader-cli/utils"
 )
 
 var ilog = logs.Logs{

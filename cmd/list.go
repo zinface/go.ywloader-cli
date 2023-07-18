@@ -7,7 +7,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"gitee.com/zinface/go.ywloader-cli/extenstions/youwant"
+	"gitee.com/zinface/ywloader-cli/extenstions/youwant"
 )
 
 const (

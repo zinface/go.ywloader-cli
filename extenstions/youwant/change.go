@@ -3,7 +3,7 @@ package youwant
 import (
 	"os"
 
-	"gitee.com/zinface/go.ywloader-cli/extenstions/logs"
+	"gitee.com/zinface/ywloader-cli/extenstions/logs"
 	"github.com/spf13/cobra"
 )
 
