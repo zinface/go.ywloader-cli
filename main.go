@@ -28,13 +28,13 @@ import (
 	"gitee.com/zinface/ywloader-cli/cmd"
 )
 
-//go:embed cli/bash-completions
+//go:embed extra/bash-completion
 var embedFs embed.FS
 
 var ywloaderBashCompletion string
 
 func init() {
-	f, err := embedFs.Open("cli/bash-completions/ywloader")
+	f, err := embedFs.Open("extra/bash-completion/ywloader")
 	if err != nil {
 		panic(err)
 	}
