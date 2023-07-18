@@ -1,0 +1,3 @@
+[submodule "extra/bash-completion"]
+	path = extra/bash-completion
+	url = https://gitee.com/zinface/bash-completion.ywloader
