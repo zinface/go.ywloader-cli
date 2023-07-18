@@ -115,7 +115,7 @@ func useWant(cmd *cobra.Command, args []string) (models.Youwant, error) {
 				}
 			}
 			if index != UnselectUse {
-				fmt.Printf("选中: %v: (%v个指令,%v个文件): %v \n", index, len(want.Template.Shell.Commands), len(want.Template.Files), want.Label)
+				fmt.Fprintf(os.Stderr, "选中: %v: (%v个指令,%v个文件): %v \n", index, len(want.Template.Shell.Commands), len(want.Template.Files), want.Label)
 				return want, nil
 			}
 			return want, fmt.Errorf("未匹配选择项: %v", args[0])

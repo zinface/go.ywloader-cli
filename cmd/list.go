@@ -35,4 +35,5 @@ func init() {
 	// is called directly, e.g.:
 	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	listCmd.Flags().BoolP("global", "g", false, "使用全局配置项")
+	listCmd.Flags().BoolP("files", "f", false, "列出指定项的文件")
 }
