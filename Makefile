@@ -10,7 +10,7 @@ install:
 SHELLCHECK=$(shell which shellcheck)
 ifneq (${SHELLCHECK}, "")
 shellcheck:
-	shellcheck disable=SC2016,SC2119,SC2155,SC2206,SC2207 cli/bash-completions/ywloader 
+	shellcheck disable=SC2016,SC2119,SC2155,SC2206,SC2207 extra/bash-completion/ywloader 
 endif
 
 # 已安装 pkg-config 并且已安装 bash-completion 将可使用
@@ -19,11 +19,11 @@ ifneq (${PKGCONFIG}, "")
 BASH_COMPATDIR=$(shell pkg-config --variable=compatdir bash-completion)
 ifneq (${BASH_COMPATDIR}, "")
 bash-completions:
-	@echo "Please run: source cli/bash-completions/ywloader"
+	@echo "Please run: source extra/bash-completion/ywloader"
 
 install-bash-completions:
-	@echo "cli/bash-completions/ywloader will be installed ywloader in ${BASH_COMPATDIR}"
-	cp cli/bash-completions/ywloader ${BASH_COMPATDIR}
+	@echo "extra/bash-completion/ywloader will be installed ywloader in ${BASH_COMPATDIR}"
+	cp extra/bash-completion/ywloader ${BASH_COMPATDIR}
 endif
 endif
 
