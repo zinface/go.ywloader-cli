@@ -27,3 +27,21 @@ Flags:
 
 Use "ywloader [command] --help" for more information about a command.
 ```
+
+## ywloader-cli 命令的安装与补全功能
+
+- 安装
+  ```sh
+  git clone --recurse-submodules https://gitee.com/zinface/ywloader-cli
+  cd ywloader-cli
+  
+  # 项目中包含 Makefile
+  make install    # 实际执行 go install
+  ```
+
+- bash-completion 脚本(正在重构中...)
+  ```sh
+  # 基于 pkg-config 命令
+  # 获取 bash-completion 包的 compatdir 变量得到可安装的位置
+  sudo make install-bash-completions
+  ```
