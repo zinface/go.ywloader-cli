@@ -26,9 +26,10 @@ import (
 	"io"
 
 	"gitee.com/zinface/ywloader-cli/cmd"
+	"gitee.com/zinface/ywloader-cli/extenstions/logs"
 )
 
-//go:embed extra/bash-completion
+//go:embed extra
 var embedFs embed.FS
 
 var ywloaderBashCompletion string
@@ -36,7 +37,8 @@ var ywloaderBashCompletion string
 func init() {
 	f, err := embedFs.Open("extra/bash-completion/ywloader")
 	if err != nil {
-		panic(err)
+		logs.WelcomeMessage("WARNING", "Embed filesystem is empty.")
+		return
 	}
 
 	buffer, err := io.ReadAll(f)
