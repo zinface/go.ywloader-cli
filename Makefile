@@ -1,6 +1,7 @@
 # 默认将构建 ywloader
 all:
-	go build
+	@test -f extra/bash-completion/README.md || git submodule update --init --recursive
+	@go build
 
 # make install 将会安装 ywloader 到 $GOPATH/bin 中
 install:
