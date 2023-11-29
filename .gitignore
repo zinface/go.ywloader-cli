@@ -33,3 +33,5 @@ go.work
 
 # debugfile
 /debug.file
+
+ywloader-cli
