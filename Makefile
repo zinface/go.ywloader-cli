@@ -30,4 +30,4 @@ endif
 
 # 进入调试模式，并指定调试文件为当前目录下的 ywloader-debug.file
 enter-debug-mode:
-	cd extra/bash-completion && export BASH_COMP_DEBUG_FILE=`pwd`/ywloader-debug.file && bash
+	cd extra/bash-completion && export BASH_COMP_YWLOADER_DEBUG_FILE=`pwd`/ywloader-debug.file && bash
