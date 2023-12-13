@@ -19,7 +19,7 @@ var updateCmd = &cobra.Command{
 	Short: _desc_update,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		logs.WelcomeMessage("youwant", _desc_update)
+		logs.WelcomeMessage("update", _desc_update)
 		youwant.UpdateHandler(cmd, args)
 	},
 }
