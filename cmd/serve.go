@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -50,7 +49,18 @@ func init() {
 func serveStart(_rootDir string, _host string, _port int) error {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.StaticFS("/", gin.Dir(_rootDir, true))
+
+	fi, err := os.Stat(_rootDir)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if fi.IsDir() {
+		r.StaticFS("/", gin.Dir(_rootDir, true))
+	} else {
+		r.StaticFile("/", _rootDir)
+	}
 
 	var host = fmt.Sprintf("%s:%d", _host, _port)
 
