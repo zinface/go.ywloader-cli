@@ -21,12 +21,14 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 	var useConfigFile = useConfigFilePathDefaultLocal(cmd)
 	ulog.UseConfig(useConfigFile)
 
+	// 加载命令行参数中指定的项目模板
 	want, err := useWant(cmd, args)
 	if err != nil {
 		ulog.Println(err.Error())
 		os.Exit(1)
 	}
 
+	// 加载所有项目模板
 	wants, err := loaderYouwants(cmd)
 	if err != nil {
 		ulog.Println(err.Error())
@@ -50,17 +52,17 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// 处理意外被发现的文件
+	// 处理意外被发现的文件，files 中存在而当前模板中不存在
 	for i := 0; i < len(files); i++ {
 		var unstored = true
 		for j := 0; j < len(want.Template.Files); j++ {
-			if files[i].Name == updateFiles[j].Name {
+			if files[i].Name == want.Template.Files[j].Name {
 				unstored = false
 				break
 			}
 		}
 		if unstored {
-			question := fmt.Sprintf("发现意外文件: '%s' 是否加入更新?(N/y)", files[i].Name)
+			question := fmt.Sprintf("> 发现意外文件: '%s' 是否加入更新?(N/y)", files[i].Name)
 			var answer = utils.GetStdinStringValue(question, "")
 			if strings.Contains(answer, "y") {
 				updateFiles = append(updateFiles, files[i])
@@ -71,8 +73,32 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	// 提示意外被删除的文件，files 中不存在而当前模板中存在
+	var fileMissing = false
+	for i := 0; i < len(want.Template.Files); i++ {
+		var isExist = false
+		for j := 0; j < len(files); j++ {
+			if want.Template.Files[i].Name == files[j].Name {
+				isExist = true
+				break
+			}
+		}
+
+		if !isExist {
+			if !fileMissing {
+				fileMissing = true
+			}
+			ulog.Println(fmt.Sprintf("发现缺失的的文件: '%s'", want.Template.Files[i].Name))
+		}
+	}
+
 	// 最终确认是否更新
-	question := fmt.Sprintf("> NOTE: 你确定要对 '%s' 进行更新吗?(N/y)", want.Label)
+	var question string
+	if fileMissing {
+		question = fmt.Sprintf("> NOTE: 将丢弃缺失项，你确定要对 '%s' 进行更新吗?(N/y)", want.Label)
+	} else {
+		question = fmt.Sprintf("> NOTE: 你确定要对 '%s' 进行更新吗?(N/y)", want.Label)
+	}
 	var answer = utils.GetStdinStringValue(question, "")
 	if strings.Contains(answer, "y") {
 		for i := 0; i < len(wants); i++ {
