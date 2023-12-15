@@ -7,6 +7,9 @@ all:
 install:
 	go install
 
+submodule-update:
+	git submodule update --init --recursive
+
 # 已安装 shellcheck 将可使用
 SHELLCHECK=$(shell which shellcheck)
 ifneq (${SHELLCHECK}, "")
