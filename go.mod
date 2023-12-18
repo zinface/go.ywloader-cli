@@ -2,7 +2,10 @@ module gitee.com/zinface/ywloader-cli
 
 go 1.17
 
-require github.com/spf13/cobra v1.4.0
+require (
+	github.com/sergi/go-diff v1.3.1
+	github.com/spf13/cobra v1.4.0
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect

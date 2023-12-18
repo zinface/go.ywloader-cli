@@ -9,6 +9,8 @@ import (
 
 	"gitee.com/zinface/ywloader-cli/extenstions/logs"
 	"gitee.com/zinface/ywloader-cli/models"
+	"gitee.com/zinface/ywloader-cli/utils"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 )
 
@@ -82,6 +84,20 @@ func DiffHandler(cmd *cobra.Command, args []string) {
 				} else {
 					difflog.Println(fmt.Sprintf("不一致的文件: %v", fi.Name))
 
+					str, err := base64.StdEncoding.DecodeString(fi.Base64)
+					if err != nil {
+						difflog.Print("处理失败", err.Error())
+						continue
+					}
+
+					var question = fmt.Sprintf("> NOTE: 你要diff '%s' 文件吗?(N/y)", fi.Name)
+					var answer = utils.GetStdinStringValue(question, "")
+					if strings.Contains(answer, "y") {
+						dmp := diffmatchpatch.New()
+						d := dmp.DiffMain(string(data), string(str), false)
+
+						fmt.Println(dmp.DiffPrettyText(d))
+					}
 				}
 			}
 		}
