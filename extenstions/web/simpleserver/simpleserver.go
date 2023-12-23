@@ -23,9 +23,19 @@ func printAccessAddress(port int) {
 	}
 }
 
+var cmd_filename string
+var cmd_cache_size uint64
+
 // SimpleServer 启动一个简单服务
 func SimpleServer(filepath string, host string, port int) error {
+	var filename string
 	fi, err := os.Stat(filepath)
+
+	if filepath == "-" {
+		fi, err = os.Stdin.Stat()
+		filename = cmd_filename
+	}
+
 	if err != nil {
 		return err
 	}
@@ -33,15 +43,21 @@ func SimpleServer(filepath string, host string, port int) error {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	if fi.IsDir() {
+	if filename != "-" && fi.IsDir() {
 		r.StaticFS("/", gin.Dir(filepath, true))
 	} else {
+		filename = path.Base(filepath)
 		// r.StaticFile("/", filepath)
 		r.GET("/", func(ctx *gin.Context) {
-			ctx.Header("Content-Disposition", "attachment; filename="+path.Base(filepath))
-			ctx.File(filepath)
-			// data, _ := os.ReadFile(filepath)
-			// ctx.Data(200, "application/octet-stream", data)
+			if filepath == "-" {
+				handleFromStdin(ctx, cmd_cache_size, cmd_filename)
+				if outOfCache {
+					os.Exit(0)
+				}
+				ctx.Done()
+			} else {
+				ctx.FileAttachment(filepath, filename)
+			}
 		})
 	}
 
@@ -72,6 +88,11 @@ func SimpleServeHandler(cmd *cobra.Command, args []string) {
 		} else {
 			_rootDir = args[0]
 		}
+	}
+
+	if _rootDir == "-" {
+		cmd_filename, _ = cmd.Flags().GetString("attachment-filename")
+		cmd_cache_size, _ = cmd.Flags().GetUint64("cache-size")
 	}
 
 	var port, _ = cmd.Flags().GetInt("port")

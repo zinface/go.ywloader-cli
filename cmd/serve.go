@@ -16,7 +16,7 @@ const (
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: _desc_serve,
-	Long:  ``,
+	Long:  _desc_serve + `，默认为当前目录，可接受指定(目录|文件)路径或标准输入(-)`,
 	Run:   simpleserver.SimpleServeHandler,
 }
 
@@ -34,4 +34,6 @@ func init() {
 	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// serveCmd.Flags().BoolP("global", "g", false, "直接使用全局")
 	serveCmd.Flags().IntP("port", "p", 8080, "端口号")
+	serveCmd.Flags().StringP("attachment-filename", "", "UnknowFile", "标准输入时的文件命名，用于响应(Content-Disposition)支持")
+	serveCmd.Flags().Uint64P("cache-size", "", 50, "标准输入时的缓冲区大小(mb)，用于响应(Content-Length)支持")
 }
