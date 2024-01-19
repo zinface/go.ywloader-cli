@@ -93,24 +93,29 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 	}
 
 	// 最终确认是否更新
-	var question string
-	if fileMissing {
-		question = fmt.Sprintf("> NOTE: 将丢弃缺失项，你确定要对 '%s' 进行更新吗?(N/y)", want.Label)
-	} else {
-		question = fmt.Sprintf("> NOTE: 你确定要对 '%s' 进行更新吗?(N/y)", want.Label)
-	}
-	var answer = utils.GetStdinStringValue(question, "")
-	if strings.Contains(answer, "y") {
-		for i := 0; i < len(wants); i++ {
-			if compare(want, wants[i]) {
-				wants[i].Template.Files = updateFiles
-				break
+	for {
+		var question string
+		if fileMissing {
+			question = fmt.Sprintf("> NOTE: 将丢弃缺失项，你确定要对 '%s' 进行更新吗?(yes/no)", want.Label)
+		} else {
+			question = fmt.Sprintf("> NOTE: 你确定要对 '%s' 进行更新吗?(yes/no)", want.Label)
+		}
+		var answer = utils.GetStdinStringValue(question, "")
+		if strings.Contains(answer, "yes") {
+			for i := 0; i < len(wants); i++ {
+				if compare(want, wants[i]) {
+					wants[i].Template.Files = updateFiles
+					break
+				}
 			}
+			if err = wants.SaveFile(useConfigFile); err == nil {
+				ulog.Println("项目更新成功")
+			}
+			break
 		}
-		if err = wants.SaveFile(useConfigFile); err == nil {
-			ulog.Println("项目更新成功")
+		if strings.Contains(answer, "no") {
+			uselog.Println("放弃处理指令集.")
+			break
 		}
-	} else {
-		ulog.Println("未确认，放弃更新.")
 	}
 }
