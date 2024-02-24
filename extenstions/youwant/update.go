@@ -79,6 +79,9 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 		var isExist = false
 		for j := 0; j < len(files); j++ {
 			if want.Template.Files[i].Name == files[j].Name {
+				if want.Template.Files[i].Base64 != files[j].Base64 {
+					ulog.Printf("发现变化的文件: '%s'", files[j].Name)
+				}
 				isExist = true
 				break
 			}
@@ -88,7 +91,7 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 			if !fileMissing {
 				fileMissing = true
 			}
-			ulog.Println(fmt.Sprintf("发现缺失的的文件: '%s'", want.Template.Files[i].Name))
+			ulog.Println(fmt.Sprintf("发现缺失的文件: '%s'", want.Template.Files[i].Name))
 		}
 	}
 

@@ -20,6 +20,6 @@ func (l *Logs) Print(prefix, message interface{}) {
 }
 
 func (l *Logs) Printf(format string, args ...interface{}) {
-	message := fmt.Sprintf(format, &args)
+	message := fmt.Sprintf(format, args...)
 	l.Println(message)
 }
