@@ -184,6 +184,10 @@ func applyWant(want models.Youwant) {
 					// 默认值为继续，当发生已存在过将暂停并询问继续
 					var _continue = true
 					if utils.FileExists(file.Name) {
+						if utils.FileCompareBase64(file.Name, file.Base64) {
+							uselog.Printf("跳过相同文件: %v", file.Name)
+							continue
+						}
 						_continue = false
 						// uselog.Print()
 						question := fmt.Sprintf("NOTE: 文件已存在(%v), 是否继续(y/n)?", file.Name)
