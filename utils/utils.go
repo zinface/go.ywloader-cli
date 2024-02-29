@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // GetUserConfigPath 从HOME变量获取用户目录路径
@@ -33,6 +36,27 @@ func FileExists(path string) bool {
 		return os.IsExist(err)
 	}
 	return !fi.IsDir()
+}
+
+func FileCompare(path string, content string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	return strings.Compare(string(data), content) == 0
+}
+
+func FileCompareBase64(path string, base string) bool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+
+	bdata, err := base64.StdEncoding.DecodeString(base)
+	if err != nil {
+		return false
+	}
+	return bytes.Compare(data, bdata) == 0
 }
 
 // DirExists 文件夹是否存在
