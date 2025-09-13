@@ -1,7 +1,10 @@
 package simpleserver
 
 import (
+	"fmt"
+	"log"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -32,4 +35,28 @@ func GetLocalAddress(t AddressType) ([]string, error) {
 		}
 	}
 	return address, nil
+}
+
+// 输出可访问地址
+func PrintLocalAddressAndGetPort(port int) int {
+	addrs, err := GetLocalAddress(IPV4)
+	if err != nil {
+		panic(err)
+	}
+
+	// 当默认的端口被占用时，将使用随机端口
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
+	if err != nil {
+		ln, _ = net.Listen("tcp", fmt.Sprintf(":%v", 0))
+	}
+	defer ln.Close() // 已获取随机端口，先关闭，再交给后续使用
+
+	_, listenPort, _ := net.SplitHostPort(ln.Addr().String())
+	port, _ = strconv.Atoi(listenPort)
+
+	for _, addr := range addrs {
+		log.Printf("启动服务器: http://%v:%v\n", addr, port)
+	}
+
+	return port
 }
