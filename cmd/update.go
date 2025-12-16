@@ -39,4 +39,5 @@ func init() {
 
 	updateCmd.Flags().BoolP("global", "g", false, "编辑全局配置项")
 	updateCmd.Flags().StringArrayP("file", "f", []string{}, "添加文件到项目")
+	updateCmd.Flags().BoolP("only-update-exists", "m", false, "仅更新已存在的项")
 }

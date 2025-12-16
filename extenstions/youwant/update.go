@@ -52,23 +52,27 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// 处理意外被发现的文件，files 中存在而当前模板中不存在
-	for i := 0; i < len(files); i++ {
-		var unstored = true
-		for j := 0; j < len(want.Template.Files); j++ {
-			if files[i].Name == want.Template.Files[j].Name {
-				unstored = false
-				break
+	only_update_exists, _ := cmd.Flags().GetBool("only-update-exists")
+
+	if !only_update_exists {
+		// 处理意外被发现的文件，files 中存在而当前模板中不存在
+		for i := 0; i < len(files); i++ {
+			var unstored = true
+			for j := 0; j < len(want.Template.Files); j++ {
+				if files[i].Name == want.Template.Files[j].Name {
+					unstored = false
+					break
+				}
 			}
-		}
-		if unstored {
-			question := fmt.Sprintf("> 发现意外文件: '%s' 是否加入更新?(N/y)", files[i].Name)
-			var answer = utils.GetStdinStringValue(question, "")
-			if strings.Contains(answer, "y") {
-				updateFiles = append(updateFiles, files[i])
-				ulog.Println("已加入模板文件更新队列")
-			} else {
-				ulog.Println(fmt.Sprintf("未确认，已忽略文件: %s", files[i].Name))
+			if unstored {
+				question := fmt.Sprintf("> 发现意外文件: '%s' 是否加入更新?(N/y)", files[i].Name)
+				var answer = utils.GetStdinStringValue(question, "")
+				if strings.Contains(answer, "y") {
+					updateFiles = append(updateFiles, files[i])
+					ulog.Println("已加入模板文件更新队列")
+				} else {
+					ulog.Println(fmt.Sprintf("未确认，已忽略文件: %s", files[i].Name))
+				}
 			}
 		}
 	}
@@ -93,6 +97,10 @@ func UpdateHandler(cmd *cobra.Command, args []string) {
 			}
 			ulog.Println(fmt.Sprintf("发现缺失的文件: '%s'", want.Template.Files[i].Name))
 		}
+	}
+
+	for _, v := range updateFiles {
+		ulog.Println(fmt.Sprintf("待更新的更新文件: %v", v.Name))
 	}
 
 	// 最终确认是否更新
