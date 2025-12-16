@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -20,7 +19,7 @@ var versionCmd = &cobra.Command{
 	Short: _desc_version,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("版本: v0.0.1")
+		fmt.Println("版本: v0.0.2")
 		fmt.Println("作者: zinface <zinface@163.com>")
 	},
 }
